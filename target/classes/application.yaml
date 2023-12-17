@@ -1,0 +1,17 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/DBForum
+    username: postgres
+    password: ny208k05
+  flyway:
+    enabled: true
+    baselineOnMigrate: true
+    locations: classpath:db/migration

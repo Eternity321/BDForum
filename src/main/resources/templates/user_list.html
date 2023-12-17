@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User List</title>
+</head>
+<body>
+
+<h2>User List</h2>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Mail</th>
+        <th>Password</th>
+        <th>Username</th>
+        <th>Action</th>
+    </tr>
+
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.mail}"></td>
+        <td th:text="${user.password}"></td>
+        <td th:text="${user.username}"></td>
+        <td>
+            <a th:href="@{/users/edit/{id}(id=${user.id})}">Edit</a> |
+            <a th:href="@{/users/delete/{id}(id=${user.id})}" onclick="return confirm('Are you sure?')">Delete</a>
+        </td>
+    </tr>
+</table>
+
+<br>
+<a href="/users/add">Add User</a>
+
+</body>
+</html>
