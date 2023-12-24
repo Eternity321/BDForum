@@ -21,7 +21,7 @@
         <td th:text="${comment.id}"></td>
         <td th:text="${comment.text}"></td>
         <td th:text="${comment.timestamp}"></td>
-        <td th:text="${comment.user.id}"></td>
+        <td th:text="${comment.user != null ? comment.user.id : ''}"></td>
         <td th:text="${comment.post.id}"></td>
     </tr>
     </tbody>

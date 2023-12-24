@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Post</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2 th:text="${post.title}" class="card-title"></h2>
+        </div>
+        <div class="card-body">
+            <p th:text="${post.text}" class="card-text"></p>
+            <p th:text="${#temporals.format(post.timestamp, 'dd.MM.yyyy HH:mm:ss')}" class="card-text text-muted"></p>
+            <a class="btn btn-secondary" th:href="@{/posts/list}">Вернуться к списку постов</a>
+        </div>
+    </div>
+    <div class="mt-4">
+        <h3>Комментарии</h3>
+        <ul class="list-group">
+            <li th:each="comment : ${post.comments}" class="list-group-item">
+                <p th:text="${comment.text}" class="mb-1"></p>
+                <p th:text="${#temporals.format(comment.timestamp, 'dd.MM.yyyy HH:mm:ss')}" class="text-muted"></p>
+
+                <a class="btn btn-danger" th:href="@{'/comments/delete/' + ${comment.id}(postId=${post.id})}">Удалить</a>
+            </li>
+        </ul>
+    </div>
+    <div class="mt-4">
+        <h3>Добавить комментарий</h3>
+        <form th:action="@{'/comments/add'}" th:method="post">
+            <input type="hidden" name="postId" th:value="${post.id}" />
+            <div class="mb-3">
+                <label for="commentText" class="form-label">Текст комментария:</label>
+                <textarea class="form-control" id="commentText" name="text" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить комментарий</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

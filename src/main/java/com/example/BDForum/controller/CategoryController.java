@@ -19,27 +19,44 @@ public class CategoryController {
 
     @GetMapping
     public String getAllCategories(Model model) {
-        List<Category> categories = categoryService.getAllCategories();
-        model.addAttribute("categories", categories);
-        return "category_list";
+        try {
+            List<Category> categories = categoryService.getAllCategories();
+            model.addAttribute("категории", categories);
+            return "category_list";
+        } catch (Exception e) {
+            model.addAttribute("сообщение об ошибке", "Ошибка при получении категорий.");
+            return "error";
+        }
     }
 
 
     @PostMapping
     public ResponseEntity<String> createCategory(@RequestBody Category category) {
+        try{
         categoryService.createCategory(category);
-        return ResponseEntity.ok("Category created successfully");
+        return ResponseEntity.ok("Категория успешно создана.");
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка добавления категории.", e);
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(@PathVariable Long id, @RequestBody Category category) {
+        try{
         categoryService.updateCategory(id, category);
-        return ResponseEntity.ok("Category updated successfully");
+        return ResponseEntity.ok("Категория успешно обновлена.");
+    } catch (Exception e) {
+        throw new RuntimeException("Ошибка обновления кастегории.", e);
+    }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
+        try{
         categoryService.deleteCategory(id);
-        return ResponseEntity.ok("Category deleted successfully");
+        return ResponseEntity.ok("Категория успешно удалена.");
+    } catch (Exception e) {
+        throw new RuntimeException("Ошибка удаления категории.", e);
+        }
     }
 }

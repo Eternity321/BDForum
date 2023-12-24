@@ -19,15 +19,24 @@ public class UserController {
 
     @GetMapping
     public String getAllUsers(Model model) {
-        List<User> users = userService.getAllUsers();
-        model.addAttribute("users", users);
-        return "user_list";
+        try {
+            List<User> users = userService.getAllUsers();
+            model.addAttribute("users", users);
+            return "user_list";
+        } catch (Exception e) {
+            model.addAttribute("сообщение об ошибке", "Ошибка при получении пользователей.");
+            return "error";
+        }
     }
 
     @GetMapping("/add")
     public String addUserForm(Model model) {
+        try{
         model.addAttribute("user", new User());
         return "add_user";
+        } catch (Exception e){
+            throw new RuntimeException("Ошибка добавления пользователя", e);
+        }
     }
 
     @PostMapping("/add")
@@ -38,12 +47,17 @@ public class UserController {
 
     @GetMapping("/edit/{id}")
     public String editUserForm(@PathVariable Long id, Model model) {
-        Optional<User> user = userService.getUserById(id);
-        if (user.isPresent()) {
-            model.addAttribute("user", user.get());
-            return "edit_user";
-        } else {
-            return "redirect:/users";
+        try {
+            Optional<User> user = userService.getUserById(id);
+            if (user.isPresent()) {
+                model.addAttribute("user", user.get());
+                return "edit_user";
+            } else {
+                return "redirect:/users";
+            }
+        } catch (Exception e){
+            model.addAttribute("сообщение об ошибке", "Ошибка при получении пользователей.");
+            return "error";
         }
     }
 
@@ -55,7 +69,11 @@ public class UserController {
 
     @GetMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        return "redirect:/users";
+        try {
+            userService.deleteUser(id);
+            return "redirect:/users";
+        } catch (Exception e){
+            throw new RuntimeException("Ошибка удаления пользователя", e);
+        }
     }
 }

@@ -1,11 +1,12 @@
 package com.example.BDForum.controller;
 
 import com.example.BDForum.model.Post;
+import com.example.BDForum.repository.PostNotFoundException;
 import com.example.BDForum.service.PostService;
 import com.example.BDForum.service.UserService;
 import com.example.BDForum.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,56 +22,111 @@ public class PostController {
     private PostService postService;
 
     @Autowired
-    private UserService userService; // Ваш сервис пользователей
+    private UserService userService;
 
     @Autowired
-    private CategoryService categoryService; // Ваш сервис категорий
+    private CategoryService categoryService;
 
-    @GetMapping
-    public String getAllPosts(Model model) {
-        List<Post> posts = postService.getAllPosts();
-        model.addAttribute("posts", posts);
-        return "post_list";
+    @GetMapping("/list")
+    public String getAllPosts(
+            @RequestParam(name = "sortMethod", defaultValue = "id") String sortMethod,
+            @RequestParam(name = "username", required = false) String username,
+            Model model) {
+        try {
+            List<Post> posts;
+            if (username != null && !username.isEmpty()) {
+                posts = postService.getAllPostsByUsername(username, Sort.by(sortMethod));
+            } else {
+                posts = postService.getAllPosts(Sort.by(sortMethod));
+            }
+            long totalPosts = postService.getTotalPosts();
+            model.addAttribute("posts", posts);
+            model.addAttribute("totalPosts", totalPosts);
+
+            return "post_list";
+        } catch (Exception e) {
+            model.addAttribute("сообщение об ошибке", "Ошибка при получении постов.");
+            return "error";
+        }
     }
+
+    @GetMapping("/{id}")
+    public String viewPost(@PathVariable Long id, Model model) {
+        try {
+            Optional<Post> postOptional = postService.getPostById(id);
+            if (postOptional.isPresent()) {
+                Post post = postOptional.get();
+                model.addAttribute("post", post);
+                return "view-post";
+            } else {
+                throw new PostNotFoundException("Пост с идентификатором " + id + " не найден");
+            }
+        } catch (Exception e) {
+            model.addAttribute("сообщение об ошибке", "Ошибка при получении поста.");
+            return "error";
+        }
+    }
+
 
     @GetMapping("/add")
     public String addPostForm(Model model) {
+        try {
         model.addAttribute("post", new Post());
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("categories", categoryService.getAllCategories());
         return "add_post";
+    } catch (Exception e) {
+        model.addAttribute("сообщение об ошибке", "Ошибка при добавлении поста.");
+        return "error";
+        }
     }
 
     @PostMapping("/add")
     public String addPost(@ModelAttribute("post") Post post) {
         postService.createPost(post);
-        return "redirect:/posts";
+        return "redirect:/posts/list";
+
     }
 
     @GetMapping("/edit/{id}")
     public String editPostForm(@PathVariable Long id, Model model) {
-        Optional<Post> post = postService.getPostById(id);
-        if (post.isPresent()) {
-            model.addAttribute("post", post.get());
-        } else {
-            return "redirect:/posts";
+        try {
+
+            Optional<Post> post = postService.getPostById(id);
+            if (post.isPresent()) {
+                model.addAttribute("post", post.get());
+            } else {
+                return "redirect:/posts/list";
+            }
+
+            model.addAttribute("users", userService.getAllUsers());
+            model.addAttribute("categories", categoryService.getAllCategories());
+
+            return "edit_post";
+        } catch (Exception e) {
+            model.addAttribute("сообщение об ошибке", "Ошибка при изменении поста.");
+            return "error";
         }
-
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("categories", categoryService.getAllCategories());
-
-        return "edit_post";
     }
 
     @PostMapping("/edit/{id}")
     public String editPost(@PathVariable Long id, @ModelAttribute("post") Post post) {
         postService.updatePost(id, post);
-        return "redirect:/posts";
+        return "redirect:/posts/list";
     }
 
     @GetMapping("/delete/{id}")
-    public String deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
-        return "redirect:/posts";
+    public String deletePost(@PathVariable Long id, Model model) {
+        try {
+            postService.deletePost(id);
+            return "redirect:/posts/list";
+        } catch (PostNotFoundException e) {
+            model.addAttribute("сообщение об ошибке", e.getMessage());
+            return "error";
+        } catch (Exception e) {
+            model.addAttribute("сообщение об ошибке", "Ошибка удаления поста");
+            return "error";
+        }
     }
+
 }

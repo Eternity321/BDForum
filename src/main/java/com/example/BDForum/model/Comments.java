@@ -15,6 +15,7 @@ public class Comments {
     @GeneratedValue
     private Long id;
     private String text;
+    private String username;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;
