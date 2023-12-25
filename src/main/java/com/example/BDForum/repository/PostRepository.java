@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
-    List<Post> findByUserUsername(String username, Sort sort);
+    Page<Post> findByUserUsername(String username, Pageable pageable);
 }

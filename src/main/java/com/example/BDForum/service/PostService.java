@@ -7,6 +7,8 @@ import com.example.BDForum.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.example.BDForum.repository.CommenstsRepository;
@@ -29,9 +31,9 @@ public class PostService {
     @Autowired
     private CommenstsRepository commentRepository;
 
-    public List<Post> getAllPosts(Sort sort) {
+    public Page<Post> getAllPosts(Pageable pageable) {
         try {
-            return postRepository.findAll(sort);
+            return postRepository.findAll(pageable);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при получении постов", e);
         }
@@ -45,9 +47,9 @@ public class PostService {
         }
     }
 
-    public List<Post> getAllPostsByUsername(String username, Sort sort) {
+    public Page<Post> getAllPostsByUsername(String username, Pageable pageable) {
         try {
-            return postRepository.findByUserUsername(username, sort);
+            return postRepository.findByUserUsername(username, pageable);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при получении постов по имени пользователя", e);
         }

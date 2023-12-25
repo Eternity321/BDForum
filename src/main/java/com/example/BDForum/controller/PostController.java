@@ -6,6 +6,9 @@ import com.example.BDForum.service.PostService;
 import com.example.BDForum.service.UserService;
 import com.example.BDForum.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,17 +34,21 @@ public class PostController {
     public String getAllPosts(
             @RequestParam(name = "sortMethod", defaultValue = "id") String sortMethod,
             @RequestParam(name = "username", required = false) String username,
+            @RequestParam(name = "page", defaultValue = "0") int page,
             Model model) {
         try {
-            List<Post> posts;
+            Page<Post> posts;
+            Pageable pageable = PageRequest.of(page, 10, Sort.by(sortMethod));
             if (username != null && !username.isEmpty()) {
-                posts = postService.getAllPostsByUsername(username, Sort.by(sortMethod));
+                posts = postService.getAllPostsByUsername(username, pageable);
             } else {
-                posts = postService.getAllPosts(Sort.by(sortMethod));
+                posts = postService.getAllPosts(pageable);
             }
             long totalPosts = postService.getTotalPosts();
-            model.addAttribute("posts", posts);
+            model.addAttribute("posts", posts.getContent());
             model.addAttribute("totalPosts", totalPosts);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", posts.getTotalPages());
 
             return "post_list";
         } catch (Exception e) {
@@ -49,6 +56,7 @@ public class PostController {
             return "error";
         }
     }
+
 
     @GetMapping("/{id}")
     public String viewPost(@PathVariable Long id, Model model) {
